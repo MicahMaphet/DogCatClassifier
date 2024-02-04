@@ -7,7 +7,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 
 file_path = ''
-model = models.load_model('model1.keras')
+model = models.load_model('model.keras')
 def open_image():
     global file_path
     file_path = filedialog.askopenfilename()
@@ -32,6 +32,7 @@ def predict():
 
 # Create the main window
 root = tk.Tk()
+root.geometry('600x600')
 root.title("Dog and Cat Predictor")
 
 # Create a label to display the image
