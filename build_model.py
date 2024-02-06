@@ -1,8 +1,6 @@
-import keras
 from keras import layers
 from keras import models
 from keras.utils import image_dataset_from_directory
-import tensorflow as tf
 import matplotlib.pyplot as plt
 
 
@@ -13,10 +11,9 @@ train_ds = image_dataset_from_directory(
     seed=123,
     labels='inferred',
     label_mode='binary',
-    batch_size=20,
+    batch_size=50,
     image_size=(150, 150)
 )
-
 
 val_ds = image_dataset_from_directory(
     directory='data/',
@@ -25,11 +22,13 @@ val_ds = image_dataset_from_directory(
     seed=123,
     labels='inferred',
     label_mode='binary',
-    batch_size=20,
+    batch_size=50,
     image_size=(150, 150)
 )
 
 model = models.Sequential([
+    layers.Resizing(150, 150),
+    layers.Rescaling(1./127.5, offset=-1),
     layers.Conv2D(32, (3, 3), activation='relu'),
     layers.Dropout(.1),
     layers.MaxPooling2D((2, 2)),
@@ -40,9 +39,6 @@ model = models.Sequential([
     layers.Dropout(.1),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(128, (3, 3), activation='relu'),
-    layers.Dropout(.1),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
     layers.Dropout(.1),
     layers.MaxPooling2D((2, 2)),
     layers.Flatten(),
@@ -59,16 +55,24 @@ model.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-history = model.fit(train_ds, epochs=10, validation_data=val_ds)
+history = model.fit(train_ds, epochs=5, validation_data=val_ds)
+
 
 print("Plotting model:")
 
-plt.plot(history.history['accuracy'], label='accuracy')
-plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.ylim([0.5, 1])
-plt.legend(loc='lower right')
+epochs = range(1, len(history.history['accuracy']) + 1)
+
+plt.plot(epochs, history.history['accuracy'], 'bo', label='accuracy')
+plt.plot(epochs, history.history['val_accuracy'], 'b', label = 'val_accuracy')
+plt.title('Training and validation accuracy')
+plt.legend()
+
+plt.figure()
+
+plt.plot(epochs, history.history['loss'], 'bo', label='loss')
+plt.plot(epochs, history.history['val_loss'], 'b', label = 'val_loss')
+plt.title('Training and validation loss')
+plt.legend()
 
 plt.show()
 
